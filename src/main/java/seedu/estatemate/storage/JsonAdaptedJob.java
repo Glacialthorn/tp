@@ -2,6 +2,7 @@ package seedu.estatemate.storage;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 
 import seedu.estatemate.commons.exceptions.IllegalValueException;
 import seedu.estatemate.model.job.Description;
@@ -16,7 +17,7 @@ class JsonAdaptedJob {
 
     private final String description;
     private final Integer id;
-    private Boolean isDone;
+    private final Boolean isDone;
 
     /**
      * Constructs a {@code JsonAdaptedJob} with the given job details.
@@ -27,7 +28,8 @@ class JsonAdaptedJob {
                           @JsonProperty("done") Boolean isDone) {
         this.description = description;
         this.id = id;
-        this.isDone = isDone;
+        this.isDone = isDone == null ? false
+                                     : isDone;
     }
 
     /**
@@ -54,6 +56,10 @@ class JsonAdaptedJob {
         }
         if (id == null || id <= 0) {
             throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, "id"));
+        }
+
+        if (isDone == null) {
+            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, "isDone"));
         }
         Job output = new Job(new Description(description), id);
         output.setDone(isDone);
