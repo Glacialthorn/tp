@@ -2,7 +2,6 @@ package seedu.estatemate.storage;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSetter;
 
 import seedu.estatemate.commons.exceptions.IllegalValueException;
 import seedu.estatemate.model.job.Description;
