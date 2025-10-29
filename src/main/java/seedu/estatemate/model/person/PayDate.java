@@ -6,6 +6,7 @@ import static seedu.estatemate.commons.util.AppUtil.checkArgument;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 
 /**
  * Represents a Person's pay date in EstateMate.
@@ -19,11 +20,11 @@ public class PayDate {
      */
     public static final String VALIDATION_REGEX = "\\d{4}-\\d{2}-\\d{2}";
 
-    public static final String MESSAGE_CONSTRAINTS = "Pay date must be in valid calendar date format: yyyy-MM-dd, "
-            + "and it should not be blank";
+    public static final String MESSAGE_CONSTRAINTS = "Pay date must be real calendar date: yyyy-MM-dd";
 
-    private static final DateTimeFormatter DATE_FORMATTER =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter
+            .ofPattern("uuuu-MM-dd")
+            .withResolverStyle(ResolverStyle.STRICT);
 
     public final String value;
 
@@ -37,8 +38,8 @@ public class PayDate {
     public PayDate(String payDate) {
         requireNonNull(payDate);
         checkArgument(isValidPayDate(payDate), MESSAGE_CONSTRAINTS);
-        value = payDate;
-        date = LocalDate.parse(value, DATE_FORMATTER);
+        this.value = payDate;
+        this.date = LocalDate.parse(value, DATE_FORMATTER);
     }
 
     /**

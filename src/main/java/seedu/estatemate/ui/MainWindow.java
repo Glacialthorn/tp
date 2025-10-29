@@ -118,7 +118,7 @@ public class MainWindow extends UiPart<Stage> {
         personListPanel = new TenantListPanel(logic.getFilteredPersonList(), model);
         personListPanelPlaceholder.getChildren().add(personListPanel.getRoot());
 
-        jobListPanel = new JobListPanel(model.getFilteredJobList(), model);
+        jobListPanel = new JobListPanel(model.getFilteredJobList());
 
         resultDisplay = new ResultDisplay();
         resultDisplayPlaceholder.getChildren().add(resultDisplay.getRoot());

@@ -50,8 +50,7 @@ public class LeaseAmount {
      * @return A display friendly string representing the lease amount.
      */
     public String toDisplayValue() {
-        // Solution below adapted from:
-        // https://stackoverflow.com/questions/3395825/how-to-print-formatted-bigdecimal-values
+        // Solution below adapted from: https://stackoverflow.com/a/3395845
         NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US);
         return currencyFormatter.format(leaseAmount);
     }

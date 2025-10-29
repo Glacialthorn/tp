@@ -4,7 +4,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
-import seedu.estatemate.model.Model;
 import seedu.estatemate.model.job.Job;
 
 /**
@@ -15,7 +14,6 @@ public class JobCard extends UiPart<Region> {
     private static final String FXML = "JobCard.fxml";
 
     public final Job job;
-    private final Model model;
 
     @FXML
     private HBox cardPane;
@@ -30,10 +28,9 @@ public class JobCard extends UiPart<Region> {
      * Creates a {@code JobCard} with the given {@code Job} and index to display.
      * It highlights the card based on the job's completion status.
      */
-    public JobCard(Job job, int displayedIndex, Model model) {
+    public JobCard(Job job, int displayedIndex) {
         super(FXML);
         this.job = job;
-        this.model = model;
 
         id.setText(displayedIndex + ". ");
         description.setText(job.getDescription().toString());

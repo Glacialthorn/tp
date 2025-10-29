@@ -40,7 +40,7 @@ public class TenantListPanel extends UiPart<Region> {
     }
 
     /**
-     * Custom {@code ListCell} that displays the graphics of a {@code Person} using a {@code PersonCard}.
+     * Custom {@code ListCell} that displays the graphics of a {@code Person} using a {@code TenantCard}.
      */
     class PersonListViewCell extends ListCell<Person> {
         @Override

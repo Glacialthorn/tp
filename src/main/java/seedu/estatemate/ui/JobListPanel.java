@@ -8,7 +8,6 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
 import seedu.estatemate.commons.core.LogsCenter;
-import seedu.estatemate.model.Model;
 import seedu.estatemate.model.job.Job;
 
 /**
@@ -17,7 +16,6 @@ import seedu.estatemate.model.job.Job;
 public class JobListPanel extends UiPart<Region> {
     private static final String FXML = "JobListPanel.fxml";
     private final Logger logger = LogsCenter.getLogger(JobListPanel.class);
-    private final Model model;
 
     @FXML
     private ListView<Job> jobListView;
@@ -25,9 +23,8 @@ public class JobListPanel extends UiPart<Region> {
     /**
      * Creates a {@code JobListPanel} with the given {@code ObservableList}.
      */
-    public JobListPanel(ObservableList<Job> jobList, Model model) {
+    public JobListPanel(ObservableList<Job> jobList) {
         super(FXML);
-        this.model = model;
         jobListView.setItems(jobList);
         jobListView.setCellFactory(listView -> new JobListViewCell());
     }
@@ -51,7 +48,7 @@ public class JobListPanel extends UiPart<Region> {
                 setGraphic(null);
                 setText(null);
             } else {
-                setGraphic(new JobCard(job, getIndex() + 1, model).getRoot());
+                setGraphic(new JobCard(job, getIndex() + 1).getRoot());
             }
         }
     }

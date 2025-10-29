@@ -23,6 +23,8 @@ public class PayDateTest {
         assertThrows(IllegalArgumentException.class, () -> new PayDate("2025-9-1"));
         assertThrows(IllegalArgumentException.class, () -> new PayDate("12-09-2025"));
         assertThrows(IllegalArgumentException.class, () -> new PayDate("2025.09.12"));
+        assertThrows(IllegalArgumentException.class, () -> new PayDate("2025-03-32"));
+        assertThrows(IllegalArgumentException.class, () -> new PayDate("2025-02-29"));
     }
 
     @Test
@@ -33,11 +35,15 @@ public class PayDateTest {
         // incorrect formats
         assertFalse(PayDate.isValidPayDate(""));
         assertFalse(PayDate.isValidPayDate(" "));
+        assertFalse(PayDate.isValidPayDate("14/10/2025")); // incorrect format
         assertFalse(PayDate.isValidPayDate("2025/09/12")); // use of '/' instead of '-'
         assertFalse(PayDate.isValidPayDate("2025-9-1")); // format: YYYY-M-D
         assertFalse(PayDate.isValidPayDate("2025.09.12")); // use of '.' instead of '-'
         assertFalse(PayDate.isValidPayDate("12-09-2025")); // format: DD-MM-YYYY
-        assertFalse(PayDate.isValidPayDate("2025-03-32")); // day 32 does not exist
+
+        // incorrect calendar dates
+        assertFalse(PayDate.isValidPayDate("2025-03-32")); // 32 does not exist
+        assertFalse(PayDate.isValidPayDate("2025-02-29")); // non-leap year
     }
 
     @Test

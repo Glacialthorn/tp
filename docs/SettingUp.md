@@ -6,8 +6,8 @@
 
 # Setting up and getting started
 
-<!-- * Table of Contents -->
-<page-nav-print />
+* [Setting up the project in your computer](#setting-up-the-project-in-your-computer)
+* [Before writing code](#before-writing-code)
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -19,7 +19,7 @@
 Follow the steps in the following guide precisely. Things will not work out if you deviate in some steps.
 </box>
 
-First, **fork** this repo, and **clone** the fork into your computer.
+First, **fork** [this repo](https://github.com/AY2526S1-CS2103T-F08a-2/tp), and **clone** the fork into your computer.
 
 If you plan to use Intellij IDEA (highly recommended):
 
@@ -52,11 +52,4 @@ If you plan to use Intellij IDEA (highly recommended):
 
 1. **Learn the design**
 
-   When you are ready to start coding, we recommend that you get some sense of the overall design by reading about [AddressBook’s architecture](DeveloperGuide.md#architecture).
-
-1. **Do the tutorials**
-   These tutorials will help you get acquainted with the codebase.
-
-   * [Tracing code](https://se-education.org/guides/tutorials/ab3TracingCode.html)
-   * [Adding a new command](https://se-education.org/guides/tutorials/ab3AddRemark.html)
-   * [Removing fields](https://se-education.org/guides/tutorials/ab3RemovingFields.html)
+   When you are ready to start coding, we recommend that you get some sense of the overall design by reading about [EstateMate’s architecture](DeveloperGuide.md#architecture).
