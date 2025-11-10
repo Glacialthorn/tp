@@ -51,7 +51,7 @@ public class EditCommand extends Command {
             + "[" + PREFIX_PHONE + "PHONE] "
             + "[" + PREFIX_EMAIL + "EMAIL] "
             + "[" + PREFIX_ADDRESS + "ADDRESS] "
-            + "[" + PREFIX_LEASE + "LEASE] "
+            + "[" + PREFIX_LEASE + "START END] "
             + "[" + PREFIX_LEASE_AMOUNT + "AMOUNT] "
             + "[" + PREFIX_PAYDATE + "PAYDATE] "
             + "[" + PREFIX_TAG + "TAG]..."

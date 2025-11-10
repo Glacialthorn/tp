@@ -36,7 +36,7 @@ pageNav: 3
     - [3.2.6 Listing All Jobs](#3-2-6-listing-all-jobs-ljob)
     - [3.2.7 Marking Job As Completed](#3-2-7-marking-job-as-completed-mark)
     - [3.2.8 Marking Job As Not Completed](#3-2-8-marking-job-as-not-completed-unmark)
-- [3.3 General Utilities](#3-3-general-features)
+- [3.3 General Utilities](#3-3-general-utilities)
     - [3.3.1 Clearing All Tenants](#3-3-1-clearing-all-tenants-clear)
     - [3.3.2 Exiting Application](#3-3-2-exiting-application-exit)
     - [3.3.3 Getting Help](#3-3-3-getting-help-help)
@@ -100,7 +100,7 @@ keep your properties running smoothly.
 
 6. Use `cd [folder path]` to navigate into the folder you put the jar file in, and use the `java -jar estatemate.jar` command to run the application.<br>
    A [GUI (Graphical User Interface)](#gui) similar to the below should appear in a few seconds. Note how the app contains some sample data.<br>
-   <img src="images/Updated_GUI_v3.png" alt="Updated GUI v3" width="600">
+   ![sample-data-gui](images/sample-data-gui.png)
 
 7. Type a [command](#command) in the command box and press Enter to execute it. e.g. typing **`help`** and pressing `Enter` will open the help window.<br>
    Some example commands you can try:
@@ -116,7 +116,7 @@ keep your properties running smoothly.
 
     * `exit` : Exits the application.<br>
 
-<img src="images/help-window.png" alt="Help Window" width="657"> <br>
+![help-window](images/help-window.png) <br>
 
 8. Refer to the [Features](#3-features) below for details of each command.
 
@@ -137,18 +137,18 @@ The available commands will be explained below.
 In EstateMate, [commands](#command) use [**prefixes**](#prefix) to identify each [parameter](#parameter).  
 Each prefix must be followed by a `/` and its corresponding value.
 
-| **Prefix** | **Meaning**     | **Example Usage**             |
-|------------|-----------------|-------------------------------|
-| `n/`       | Name            | `n/John Tan`                  |
-| `p/`       | Phone Number    | `p/91234567`                  |
-| `e/`       | Email Address   | `e/jtan@example.com`          |
-| `a/`       | Address         | `a/Blk 123 #12-34`            |
-| `lease/`   | Lease Start-End | `lease/2025-01-01 2026-12-31` |
-| `r/`       | Amount          | `r/2800.00`                   |
-| `paydate/` | PayDate         | `paydate/2025-01-01`          |
-| `t/`       | Tag             | `t/friend`                    |
-| `j/`       | Job Number | `j/2`                          |
-| `d/`      | Description  | `d/Broken pipe`        |
+| **Prefix** | **Meaning**                      | **Example Usage**             |
+|------------|----------------------------------|-------------------------------|
+| `n/`       | Tenant name                      | `n/John Tan`                  |
+| `p/`       | Phone number                     | `p/91234567`                  |
+| `e/`       | Email address                    | `e/jtan@example.com`          |
+| `a/`       | Address                          | `a/Blk 123 #12-34`            |
+| `lease/`   | Lease period (start to end date) | `lease/2025-01-01 2026-12-31` |
+| `r/`       | Rent amount                      | `r/2800.00`                   |
+| `paydate/` | The next rent payment deadline   | `paydate/2025-01-01`          |
+| `t/`       | Tag                              | `t/friend`                    |
+| `j/`       | Job number                       | `j/2`                         |
+| `d/`       | Description                      | `d/Broken pipe`        |
 
 💡**Tip:**<br>
 Combine multiple prefixes in one command:<br>
@@ -171,13 +171,13 @@ Each feature is grouped by functionality:
 ⚠️ <strong>Important Notes about Command Format:</strong><br><br>
 
 * Words in `UPPER_CASE` are the [parameters](#parameter) to be supplied by the user.<br>
-  e.g. in `add n/NAME`, `NAME` is a parameter which can be used as `add n/John Doe`.
+  e.g. in `tenant n/NAME`, `NAME` is a parameter which can be used as `tenant n/John Doe`.
 
 * Items in square brackets are optional.<br>
   e.g. `n/NAME [t/TAG]` can be used as `n/John Doe t/friend` or as `n/John Doe`.
 
 * Items with `…`​ after them can be used multiple times including zero times.<br>
-  e.g. `[t/TAG]…​` can be used as ` ` (i.e. 0 times), `t/friend`, `t/friend t/family` etc.
+  e.g. `[t/TAG]…​` can be used as ` ` (i.e. 0 times), `t/friend`, or `t/friend t/family` etc.
 
 * Parameters can be in any order.<br>
   e.g. if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
@@ -202,15 +202,29 @@ Format: `tenant n/NAME p/PHONE e/EMAIL a/ADDRESS lease/START END r/AMOUNT paydat
 
 📌**Note:** 
 - A tenant can have any number of tags, including zero.
-- Address can only take up to 500 characters including spaces, symbols and punctuations.
+- Tags help you label tenants with additional info (for example: `t/friendly`, `t/overdue`, `t/contractor`, `t/vip`).
+- Tags are **purely descriptive** in the current version, commands like [`find`](#3-1-4-finding-a-tenant-find) do **not** look at tags.
+  - If you don't want to add any tags, do not type "t/" at all.
+- Address can only take up to 170 characters including spaces, symbols and punctuations.
+- `lease/START END` refers to the lease period, specified as two valid calendar dates in the format `yyyy-MM-dd yyyy-MM-dd`, separated by exactly one space. The first date is the start date and the second date is the end date. The end date must be on the same day or after the start date.
+- Pay date is used to record the tenant's next rent payment deadline. You must enter a valid calendar date with the format `yyyy-MM-dd`.
+  ![before-add-v3.png](images/before-add-v3.png)
+  <br><br>
+  ![after-add-v3.png](images/after-add-v3.png)
+- As seen in the "After" picture, there is an empty "Jobs:" field in the success message, indicating that the tenant
+  was created without jobs assigned to them yet.
 
 Examples:
 - `tenant n/John Tan p/91234567 e/jtan@example.com a/Blk 123 #12-34, Bedok lease/2025-01-01 2026-12-31 r/2800.00 paydate/2025-01-01`
 - `tenant n/Sarah Kim p/12398653 e/sarahk@example.com a/Blk 234 #56-78, Clementi lease/2025-02-02 2027-02-02 r/4000.00 paydate/2025-02-02`
 
-  ![before-add-v2.png](images/before-add-v2.png)
-  <br><br>
-  ![after-add-v2.png](images/after-add-v2.png)
+<strong>❗ Warning:</strong><br>
+- For addresses that begin with the part `a/`, ensure that there is no space between the prefix and the address, for the input to be considered valid.
+  - e.g. `a/a/Clementi Avenue 1` will be considered acceptable input, while `a/ a/Clementi Avenue 1` will not.
+
+💡**Tip:**
+- The pay date is managed manually, giving you the flexibility to adjust the payment schedule as needed. Use [edit](#3-1-3-editing-a-tenant-edit) to update your tenant's pay date. 
+- You can set the pay date to be outside the lease period if you need to track pre-payments, post-payments or other irregular rent arrangements. 
 
 <br>
 
@@ -221,7 +235,7 @@ Format: `delete TENANT_NUMBER`
 
 📌**Note:** 
 - `TENANT_NUMBER` is the index displayed next to each tenant in the tenant list, and must be a ***positive number*** between 1 and 2147483647.
-- Only tenants that exist in the current displayed list can be deleted.
+- Only tenants that exist in the ***latest displayed*** tenant list (most recent use of [`list`](#3-1-5-listing-all-tenants-list) or [`find`](#3-1-4-finding-a-tenant-find) commands) can be deleted. 
 
 <div style="border-left: 4px solid red; background-color: #ffe6e6; padding: 15px;">
 
@@ -244,14 +258,13 @@ Examples:
 
 Edits an existing tenant in the application.
 
-Format: `edit TENANT_NUMBER [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [lease/LEASE] [r/AMOUNT] [paydate/PAYDATE] [t/TAG]…​`
+Format: `edit TENANT_NUMBER [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [lease/START END] [r/AMOUNT] [paydate/PAYDATE] [t/TAG]…​`
 
 📌**Note:**
 - `TENANT_NUMBER` is the index displayed next to each tenant in the tenant list, and must be a ***positive number*** between 1 and 2147483647.
 - Provide ***at least one*** parameter to edit.
-- Tags are replaced, not added cumulatively; t/ clears all tags.
-- You can remove all the person’s tags by typing `t/` without
-   specifying any tags after it.
+- Tags are replaced, not merged. If you run `edit 2 t/friendly t/overdue`, the tenant will end up with **only** those two tags regardless of how many tags they had before.
+- You can remove all the person’s tags by typing `t/` without specifying any tags after it.
 
 Examples:
 - `edit 1 p/91234567 e/johndoe@example.com` edits the phone number and email address of the 1st tenant to be `91234567` and `johndoe@example.com` respectively.
@@ -260,6 +273,7 @@ Examples:
 💡**Tip:**
 - Use [`list`](#3-1-5-listing-all-tenants-list) or [`find`](#3-1-4-finding-a-tenant-find) first to confirm the correct tenant before editing to avoid overwriting important data. 
 - When updating multiple parameters, include all changes in a single command to reduce errors.
+- Use `edit` whenever you need to update a tenant's [pay date](#paydate) to reflect a new rent payment deadline. 
 <br>
 
 #### 3.1.4 Finding a Tenant: `find`
@@ -269,10 +283,10 @@ Finds tenants whose names contain any of the given [keywords](#keyword).
 Format: `find KEYWORD [MORE_KEYWORDS]`
 
 📌**Note:**
-- The search is case-insensitive. e.g `hans` will match `Hans`
-- The order of the keywords does not matter. e.g. `Hans Bo` will match `Bo Hans`
+- The search is case-insensitive. e.g `hans` will match `Hans`.
+- The order of the keywords does not matter. e.g. `Hans Bo` will match `Bo Hans`.
 - Only the names of tenants are searched.
-- Only full words will be matched e.g. `Han` will not match `Hans`
+- Only full words will be matched e.g. `Han` will not match `Hans`.
 - Tenants matching at least one keyword will be returned.
     e.g. `Hans Bo` will return `Hans Gruber`, `Bo Yang`
 
@@ -308,7 +322,9 @@ Format: `job d/DESCRIPTION`
 📌**Note:**
 - Provide a ***clear and concise*** description of the maintenance issue.
 - Jobs can later be linked to tenants for easy tracking.
-- Adding multiple jobs with the same description is allowed. This is useful when different units report the similar issues.
+- Adding multiple jobs with the same description is allowed. This is useful when different units report similar issues.
+- Repeated use of the `d/` prefix will take the last use for the job description.
+  - e.g. `job d/Water leakage d/Pipe leakage` will create one job with description `Pipe leakage`.
 
 Examples:
 - `job d/Water leakage in ceiling`
@@ -317,6 +333,7 @@ Examples:
 💡**Tip:**
 - Use consistent wording for similar issues (e.g., "Pipe leakage" vs "Leaking pipe") to make [finding](#3-2-4-finding-a-job-fjob) the job easier later on.
 - Add jobs as soon as issues are reported to keep tenant records up-to-date.
+- Create a new job of the same description if there are separate instances of the same problem (e.g. different leaking pipes in separate units).
 <br>
 
 #### 3.2.2 Deleting a Job: `djob`
@@ -326,7 +343,8 @@ Format: `djob JOB_NUMBER`
 
 📌**Note:**
 - `JOB_NUMBER` is the index displayed next to each job in the job list, and must be a ***positive number*** between 1 and 2147483647.
-- Only jobs that exist in the current displayed list can be deleted.
+- `JOB_NUMBER` is a unique number tied to each job, and will not be affected by the use of 
+[`ljob`](#3-2-6-listing-all-jobs-ljob) and [`fjob`](#3-2-4-finding-a-job-fjob), unlike the `TENANT_NUMBER` of the [`delete`](#3-1-2-deleting-a-tenant-delete) command.
 - Deleting a job removes it from all tenants’ assigned job lists.
 
 <div style="border-left: 4px solid red; background-color: #ffe6e6; padding: 15px;">
@@ -355,7 +373,9 @@ Format: `ejob JOB_NUMBER d/DESCRIPTION`
 - `JOB_NUMBER` is the index displayed next to each job in the job list, and must be a ***positive number*** between 1 and 2147483647.
 - Only jobs that exist in the current displayed list can be edited.
 - Provide a ***clear and concise*** description of the maintenance issue.
-- Editing a job to match the description of another job is allowed. This is useful when different units report the similar issues.
+- Editing a job to match the description of another job is allowed. This is useful when different units report similar issues.
+- Repeated use of the `d/` prefix will take the last use to edit the job description.
+  - e.g. `ejob 1 d/Water leakage d/Pipe leakage` will edit the description of job 1 to `Pipe leakage`.
 
 Examples:
 * `ejob 3 d/fix faucet` changes the description of the job with job number 3 to "fix faucet".
@@ -370,10 +390,10 @@ Finds maintenance jobs whose descriptions contain any of the given [keywords](#k
 Format: `fjob KEYWORD [MORE KEYWORDS]`
 
 📌**Note:**
-- The search is case-insensitive. e.g `pipe` will match `Pipe`
-- The order of the keywords does not matter. e.g. `Pipe leak` will match `leak pipe`
+- The search is case-insensitive. e.g `pipe` will match `Pipe`.
+- The order of the keywords does not matter. e.g. `Pipe leak` will match `leak pipe`.
 - Only the description is searched.
-- Only full words will be matched e.g. `Pipe` will not match `Pipes`
+- Only full words will be matched e.g. `Pipe` will not match `Pipes`.
 - Maintenance jobs matching at least one keyword will be returned.
    e.g. `Broken window` will return `Broken pipe`, `Window repair`
 
@@ -394,18 +414,23 @@ Format: `link TENANT_NUMBER j/JOB_NUMBER`
 - `JOB_NUMBER` is the index displayed next to each job in the job list.
 - You can only link jobs and tenants that already exist in the system.
 - Once linked, the job will appear under the tenant’s assigned jobs in the display.
-- Deleting a linked job will also remove it from the all tenants' assigned job lists.
-- Marking and unmarking linked job will change the status of completion under tenant's assigned job list.
+- Deleting a linked job will also remove it from all tenants' assigned job lists.
+- Marking and unmarking a linked job will change the completion status under the tenant’s assigned job list.
+- The same job can be linked to multiple tenants.
+- Repeated use of the `j/` prefix will take the last use as the job to link to the tenant.
+  - e.g. `link 1 j/1 j/3` will link **only** job 3 to the first tenant in the list.
 
 Examples:
 - `link 1 j/2` links the 2nd maintenance job in the job list to the 1st tenant in the tenant list. 
 <br>
 
-  <img src="images/linked-job.png" alt="Linked Job" width="1200">
+![linked-job](images/linked-job.png)
 <br>
 
 💡**Tip:**
 - Link jobs as soon as they are created to keep tenants’ maintenance records accurate and avoid losing track of pending tasks.
+- Link the same job to multiple tenants only if they all face the same shared issue (e.g. The same pest infestation affects multiple units). When you [`mark`](#3-2-7-marking-job-as-completed-mark) or [`unmark` ](#3-2-8-marking-job-as-not-completed-unmark) the job, the status will be reflected for all linked tenants. 
+- Link different jobs to different tenants if they are separate issues (e.g. Unrelated pest infestations in different buildings).
 
 #### 3.2.6 Listing All Jobs: `ljob`
 Displays a list of all jobs currently stored in the application, ordered from the earliest added to the most recent.
@@ -425,17 +450,21 @@ Format: `mark JOB_NUMBER`
 - `JOB_NUMBER` is the index displayed next to each job in the job list, and must be a ***positive number*** between 1 and 2147483647.
 - Once marked, the job status will be updated in the display under any linked tenant.
 - If a job is marked by mistake, you can use the [`unmark`](#3-2-8-marking-job-as-not-completed-unmark) command to revert it to `Not Completed`.
+- `mark` will complete the job for all tenants linked to the job.
+- You can even mark a job not currently linked to any tenant, for cases where a job for cases where a job is related to an unoccupied unit.
 
 Examples:
 - `mark 2` updates the completion status of job number 2 of the job list to 'completed'.
-<div style="display:flex; gap: 10px">  <img src="images/marked-tenantlist.png" alt="Marked Tenant List" width="457">
-  <img src="images/marked-joblist.png" alt="Updated GUI v2" width="492">
+
+<div style="display:flex; gap: 10px">
+    <a href="images/marked-tenant-list.png"><img src="images/marked-tenant-list.png" alt="marked tenant list"></a>
+    <a href="images/marked-job-list.png"><img src="images/marked-job-list.png" alt="marked job list"></a>
 </div>
 <br>
 
 💡**Tip:**
 - Use [`ljob`](#3-2-6-listing-all-jobs-ljob) to double-check the job list before using `mark` to ensure you’re updating the correct job.
-- Use [`unmark`](#3-2-8-marking-job-as-not-completed-unmark) to revert mistakes if a job is accidentally marked as not completed.
+- Use [`unmark`](#3-2-8-marking-job-as-not-completed-unmark) to revert mistakes if a job is accidentally marked as completed.
 
 #### 3.2.8 Marking Job as Not Completed: `unmark`
 Reverts a maintenance job's status to `Not Completed` in case it was marked as complete by mistake.
@@ -445,6 +474,8 @@ Format: `unmark JOB_NUMBER`
 📌**Note:**
 - `JOB_NUMBER` is the index displayed next to each job in the job list, and must be a ***positive number*** between 1 and 2147483647.
 - Once unmarked, the job will no longer appear as completed.
+- `unmark` will mark the job as not complete for all tenants linked to the job.
+- You can even mark a job not currently linked to any tenant as not complete, for cases where a job related to an unoccupied unit.
 
 Examples:
 - `unmark 3` updates the status of job number 3 in the job list back to not completed.
@@ -455,11 +486,13 @@ Examples:
 
 <br>
 
+<div style="page-break-after: always;"></div>
+
 ### 3.3 General Utilities 
 <br>
 
 #### 3.3.1 Clearing All Tenants: `clear`
-Removes **ALL** tenants from the application.
+Removes **ALL** tenants and maintenance jobs from the application.
 
 Format: `clear`
 
@@ -498,7 +531,7 @@ Action                      | Format                                            
 [**Clear**](#3-3-1-clearing-all-tenants-clear)              | `clear`                                                                            |
 [**Delete Tenant**](#3-1-2-deleting-a-tenant-delete)       | `delete TENANT_NUMBER`                                                             | `delete 3`                                                                             
 [**Delete Job**](#3-2-2-deleting-a-job-djob)                | `djob JOB_NUMBER`                                                                  | `djob 3`                                                                                     
-[**Edit Tenant**](#3-1-3-editing-a-tenant-edit)             | `edit TENANT_NUMBER [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS]`               | `edit 2 n/James Lee e/jameslee@example.com` 
+[**Edit Tenant**](#3-1-3-editing-a-tenant-edit)             | `edit TENANT_NUMBER [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [lease/LEASE] [r/AMOUNT] [paydate/PAYDATE] [t/TAG]…​`               | `edit 2 n/James Lee p/23847674 e/jameslee@example.com a/Kent Ridge, Blk #520 lease/2025-01-01 2026-12-31 r/1234.56 paydate/2025-02-01 t/friend` 
 [**Edit Job**](#3-2-3-editing-a-job-ejob)                   | `ejob JOB_NUMBER d/DESCRIPTION`                                                    | `ejob 3 d/fix faucet`                     
 [**Exit**](#3-3-2-exiting-application-exit)                 | `exit`                                                                             |
 [**Find Tenant**](#3-1-4-finding-a-tenant-find)             | `find KEYWORD [MORE_KEYWORDS]`                                                     | `find James Jake`                         
@@ -511,7 +544,6 @@ Action                      | Format                                            
 [**Unmark Job**](#3-2-8-marking-job-as-not-completed-unmark)| `unmark JOB_NUMBER`                                                                | `unmark 1`
 
 --------------------------------------------------------------------------------------------------------------------
-<div style="page-break-after: always;"></div>
 
 ## 5. FAQ and Known Issues
 <br>
@@ -554,5 +586,6 @@ UPPER_CASE Parameter                              | A placeholder for a paramete
 <a name="job"></a>Job                             | A maintenance task that is related to the property you are tracking. Jobs can be linked to tenants. 
 <a name="job-number"></a>Job Number               | The number shown beside a job in the EstateMate app. Commands like `djob 3` use this number.
 <a name="index"></a>Index                         | The number displayed beside each tenant or job in the EstateMate app. Commands like `delete 2` use this number.
+<a name="paydate"></a>Paydate                     | The date when a tenant's next rent payment is due. You must manually update your tenant's paydate whenever the next payment deadline changes. 
 
 <br>

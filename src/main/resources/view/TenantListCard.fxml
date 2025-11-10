@@ -34,7 +34,7 @@
         <Label fx:id="phone" styleClass="cell_small_label" text="\$phone" />
       </HBox>
       <HBox spacing="5">
-        <Label text="Addess:" styleClass="cell_small_label_bold"/>
+        <Label text="Address:" styleClass="cell_small_label_bold"/>
         <Label fx:id="address" styleClass="cell_small_label" text="\$address" />
       </HBox>
       <HBox>

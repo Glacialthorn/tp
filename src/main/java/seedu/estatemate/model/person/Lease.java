@@ -18,7 +18,8 @@ public class Lease {
             + "and adhere to the following constraints:\n"
             + "1. The first date is the start date and the second date is the end date.\n"
             + "2. The end date must be on the same day or after the start date.\n"
-            + "3. The dates must be valid calendar dates.";
+            + "3. The dates must be valid calendar dates.\n"
+            + "4. There must be exactly one space between the start and end date.";
 
     /*
      * A valid input consists of 2 dates of format dddd-dd-dd, separated by a space.

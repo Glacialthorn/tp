@@ -106,7 +106,7 @@ The `UI` component,
 * `MainWindow` stores a reference to a `Model` interface instance. This is to pass the `Model` instance to
   `TenantListPanel` as well as to retrieve job information for `JobListPanel`.
 * `TenantCard` has a stronger association with the `Model` component because it stores a reference to a `Model`
-  interface instance. However, this is used only retrieve and display jobs linked to a tenant.
+  interface instance. However, this is used only to retrieve and display jobs linked to a tenant.
   </box>
 
 <div style="page-break-after: always;"></div>
@@ -239,7 +239,7 @@ This section explains how **Jobs** are modelled, parsed, stored, and presented.
 
 **Post-mutation behaviour**
 
-* After any mutation, `ModelManager` resets the filter to `PREDICATE_SHOW_ALL_JOBS`.
+* After job-list-changing mutations (job / ejob / djob), `ModelManager` resets the job filter to `PREDICATE_SHOW_ALL_JOBS`. Mark/unmark just update the job’s status and keep the current filter.
 
 <puml src="diagrams/JobAddSequence.puml" width="900" />
 
@@ -263,7 +263,7 @@ This section explains how **Jobs** are modelled, parsed, stored, and presented.
 **Lists & Cards**
 
 * `JobListPanel` renders the `ObservableList<Job>`.
-* Each `JobCard` shows index, `id`, `description`, and a completion badge derived from `isDone`.
+* Each `JobCard` shows `id`, `description`, and a completion badge derived from `isDone`.
 * The list updates automatically when `ModelManager`'s `filteredJobs` changes.
 
 <puml src="diagrams/JobUiClassDiagram.puml" width="360" />
@@ -275,124 +275,6 @@ This section explains how **Jobs** are modelled, parsed, stored, and presented.
 * **Safe startup**: duplicate jobs in storage (by id) cause load to fail; the app falls back to **empty**
   data.
 * **Consistency**: job deletion removes any references from tenants (by id) to keep the model coherent.
-
---------------------------------------------------------------------------------------------------------------------
-
-## **Proposed features**
-
-This section describes some noteworthy proposed features that may be implemented in the future.
-
-### \[Proposed\] Undo/redo feature
-
-#### Proposed Implementation
-
-The proposed undo/redo mechanism is facilitated by `VersionedAddressBook`. It extends `AddressBook` with an undo/redo
-history, stored internally as an `addressBookStateList` and `currentStatePointer`. Additionally, it implements the
-following operations:
-
-* `VersionedAddressBook#commit()`— Saves the current address book state in its history.
-* `VersionedAddressBook#undo()`— Restores the previous address book state from its history.
-* `VersionedAddressBook#redo()`— Restores a previously undone address book state from its history.
-
-These operations are exposed in the `Model` interface as `Model#commitAddressBook()`, `Model#undoAddressBook()` and
-`Model#redoAddressBook()` respectively.
-
-Given below is an example usage scenario and how the undo/redo mechanism behaves at each step.
-
-Step 1. The user launches the application for the first time. The `VersionedAddressBook` will be initialized with the
-initial address book state, and the `currentStatePointer` pointing to that single address book state.
-
-<puml src="diagrams/UndoRedoState0.puml" alt="UndoRedoState0" />
-
-Step 2. The user executes `delete 5` command to delete the 5th person in the address book. The `delete` command calls
-`Model#commitAddressBook()`, causing the modified state of the address book after the `delete 5` command executes to be
-saved in the `addressBookStateList`, and the `currentStatePointer` is shifted to the newly inserted address book state.
-
-<puml src="diagrams/UndoRedoState1.puml" alt="UndoRedoState1" />
-
-Step 3. The user executes `tenant n/David …​` to add a new person. The `tenant` command also calls
-`Model#commitAddressBook()`, causing another modified address book state to be saved into the `addressBookStateList`.
-
-<puml src="diagrams/UndoRedoState2.puml" alt="UndoRedoState2" />
-
-<box type="info" seamless>
-
-**Note:** If a command fails its execution, it will not call `Model#commitAddressBook()`, so the address book state will
-not be saved into the `addressBookStateList`.
-
-</box>
-
-Step 4. The user now decides that adding the person was a mistake, and decides to undo that action by executing the
-`undo` command. The `undo` command will call `Model#undoAddressBook()`, which will shift the `currentStatePointer` once
-to the left, pointing it to the previous address book state, and restores the address book to that state.
-
-<puml src="diagrams/UndoRedoState3.puml" alt="UndoRedoState3" />
-
-
-<box type="info" seamless>
-
-**Note:** If the `currentStatePointer` is at index 0, pointing to the initial AddressBook state, then there are no
-previous AddressBook states to restore. The `undo` command uses `Model#canUndoAddressBook()` to check if this is the
-case. If so, it will return an error to the user rather
-than attempting to perform the undo.
-
-</box>
-
-The following sequence diagram shows how an undo operation goes through the `Logic` component:
-
-<puml src="diagrams/UndoSequenceDiagram-Logic.puml" alt="UndoSequenceDiagram-Logic" />
-
-<box type="info" seamless>
-
-**Note:** The lifeline for `UndoCommand` should end at the destroy marker (X) but due to a limitation of PlantUML, the
-lifeline reaches the end of diagram.
-
-</box>
-
-Similarly, how an undo operation goes through the `Model` component is shown below:
-
-<puml src="diagrams/UndoSequenceDiagram-Model.puml" alt="UndoSequenceDiagram-Model" />
-
-The `redo` command does the opposite — it calls `Model#redoAddressBook()`, which shifts the `currentStatePointer` once
-to the right, pointing to the previously undone state, and restores the address book to that state.
-
-<box type="info" seamless>
-
-**Note:** If the `currentStatePointer` is at index `addressBookStateList.size() - 1`, pointing to the latest address
-book state, then there are no undone AddressBook states to restore. The `redo` command uses `Model#canRedoAddressBook()`
-to check if this is the case. If so, it will return an error to the user rather than attempting to perform the redo.
-
-</box>
-
-Step 5. The user then decides to execute the command `list`. Commands that do not modify the address book, such as
-`list`, will usually not call `Model#commitAddressBook()`, `Model#undoAddressBook()` or `Model#redoAddressBook()`. Thus,
-the `addressBookStateList` remains unchanged.
-
-<puml src="diagrams/UndoRedoState4.puml" alt="UndoRedoState4" />
-
-Step 6. The user executes `clear`, which calls `Model#commitAddressBook()`. Since the `currentStatePointer` is not
-pointing at the end of the `addressBookStateList`, all address book states after the `currentStatePointer` will be
-purged. Reason: It no longer makes sense to redo the `tenant n/David …​` command. This is the behavior that most modern
-desktop applications follow.
-
-<puml src="diagrams/UndoRedoState5.puml" alt="UndoRedoState5" />
-
-The following activity diagram summarizes what happens when a user executes a new command:
-
-<puml src="diagrams/CommitActivityDiagram.puml" width="250" />
-
-#### Design considerations:
-
-**Aspect: How undo & redo executes:**
-
-* **Alternative 1 (current choice):** Saves the entire address book.
-    * Pros: Easy to implement.
-    * Cons: May have performance issues in terms of memory usage.
-
-* **Alternative 2:** Individual command knows how to undo/redo by
-  itself.
-    * Pros: Will use less memory (e.g. for `delete`, just save the person being deleted).
-    * Cons: We must ensure that the implementation of each individual command are correct.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -420,7 +302,7 @@ The following activity diagram summarizes what happens when a user executes a ne
 
 **Value proposition**:
 EstateMate helps property managers stay organized and in control of their operations.
-It provides a ***centralized and efficient way*** to manage tenants, rental records, and maintenance jobs all froma
+It provides a ***centralized and efficient way*** to manage tenants, rental records, and maintenance jobs all from a
 simple, keyboard-friendly interface.
 With EstateMate, users can:
 
@@ -493,20 +375,20 @@ Use case ends.
 
 **MSS**
 
-1. User requests to delete a tenant by specifying a **TENANT_NUMBER** using the command `delete TENANT_NUMBER`.
-2. **System** verifies that the provided **TENANT_NUMBER** is a positive integer and corresponds to an existing tenant.
-3. **System** removes the tenant record associated with the **TENANT_NUMBER** and all linked jobs.
+1. User requests to delete a specific tenant.
+2. **System** verifies that the request is valid and corresponds to an existing tenant.
+3. **System** removes the specified tenant.
 4. **System** shows the success message and refreshes the list of tenants automatically.
 
 Use case ends.
 
 **Extensions**
 
-* 2a. The provided **TENANT_NUMBER** is empty or is not a positive number.
-    * 2a1. **System** shows an error message that the provided **TENANT_NUMBER** is invalid and provides
+* 2a. The given tenant number is invalid.
+    * 2a1. **System** shows an error message that the provided tenant number is invalid and provides
       the correct input format. <br>
       Use case ends.
-* 2b. The provided **TENANT_NUMBER** does not correspond to any existing tenant.
+* 2b. The given tenant number does not correspond to any existing tenant.
     * 2b1. **System** shows an error message indicating that the tenant does not exist. <br>
       Use case ends.
 
@@ -516,19 +398,15 @@ Use case ends.
 
 **MSS**
 
-1. User requests to view all tenant information by using the `list` command.
-2. **System** retrieves all existing tenant records from the database.
-3. **System** displays the full list of tenants, including all details for each tenant.
+1. User requests to view all tenant information.
+2. **System** displays the full list of tenants, including all details for each tenant.
 
 Use case ends.
 
 **Extensions**
 
-* 1a. The command contains errors (e.g., wrong spelling).
+* 1a. The command format is wrong (e.g., wrong spelling).
     * 1a1. **System** shows an error message indicating that the command format is invalid. <br>
-      Use case ends.
-* 2a. No tenants exist in the **System**.
-    * 2a1. **System** shows a message indicating that the tenant list is empty. <br>
       Use case ends.
 
 ---
@@ -537,18 +415,17 @@ Use case ends.
 
 **MSS**
 
-1. User requests to add a maintenance job, providing the description of job using the command `job d/DESCRIPTION`.
-2. **System** verifies that **DESCRIPTION** is provided and not empty.
-3. **System** creates a new maintenance job and sets its status to "Pending" in the job list.
-4. **System** shows the success message
-5. **System** automatically updates the job list display to include the newly added job.
+1. User requests to add a maintenance job, with provided job description.
+2. **System** verifies that description is provided and not empty.
+3. **System** creates a new maintenance job and sets default status in the job list.
+4. **System** shows the success message and refreshes the job list display to include the newly added job.
 
 Use case ends.
 
 **Extensions**
 
-* 2a. The **DESCRIPTION** is missing or empty.
-    * 2a1. **System** shows an error message indicating that the **DESCRIPTION** cannot be empty. <br>
+* 2a. The given job description is missing or empty.
+    * 2a1. **System** shows an error message indicating that the description cannot be empty. <br>
       Use case ends.
 
 ---
@@ -557,21 +434,20 @@ Use case ends.
 
 **MSS**
 
-1. User requests to delete a maintenance job using the command `djob JOB_NUMBER`.
-2. **System** verifies that the **JOB_NUMBER** is a positive integer and corresponds to an existing job in the job list.
-3. **System** deletes the maintenance job associated with the specified **JOB_NUMBER**
-4. **System** shows the success message.
-5. **System** automatically updates the job list to reflect the removal.
+1. User requests to delete a maintenance job.
+2. **System** verifies that the request is valid and corresponds to an existing job.
+3. **System** deletes the specified maintenance job.
+4. **System** shows the success message and refreshes the job list to reflect the removal.
 
 Use case ends.
 
 **Extensions**
 
-* 2a. The **JOB_NUMBER** is empty or is not a positive integer.
-    * 2a1. **System** shows an error message that the provided **JOB_NUMBER** is invalid and provides
+* 2a. The given input is invalid (e.g., empty, not positive integer).
+    * 2a1. **System** shows an error message that the provided input is invalid and provides
       the correct input format. <br>
       Use case ends.
-* 2b. The **JOB_NUMBER** does not correspond to any existing job.
+* 2b. The given input does not correspond to any existing job.
     * 2b1. **System** shows an error message indicating that the job does not exist. <br>
       Use case ends.
 
@@ -581,19 +457,15 @@ Use case ends.
 
 **MSS**
 
-1. User requests to view all maintenance jobs by using the `ljob` command.
-2. **System** retrieves all existing job records from the database.
-3. **System** displays the full list of maintenance jobs, including the completion status of each job.
+1. User requests to view all maintenance jobs.
+2. **System** displays the full list of maintenance jobs, including the completion status of each job.
 
 Use case ends.
 
 **Extensions**
 
-* 1a. The command contains errors (e.g., wrong spelling).
+* 1a. The command format is wrong (e.g., wrong spelling).
     * 1a1. **System** shows an error message indicating that the command format is invalid. <br>
-      Use case ends.
-* 2a. No jobs exist in the **System**.
-    * 2a1. **System** shows a message indicating that the job list is empty. <br>
       Use case ends.
 
 ---
@@ -602,22 +474,21 @@ Use case ends.
 
 **MSS**
 
-1. User requests to mark a maintenance job as completed by using the command `mark JOB_NUMBER`.
-2. **System** verifies that the **JOB_NUMBER** is a positive integer and corresponds to an existing, unmarked job.
-3. **System** sets the status of the maintenance job to "Completed".
-4. **System** shows the success message.
-5. **System** automatically updates the maintenance job list display
+1. User requests to mark a maintenance job as completed.
+2. **System** verifies that the request is valid and corresponds to an existing unmarked job.
+3. **System** sets the status of the maintenance job.
+4. **System** shows the success message and refreshes the maintenance job list display
    to reflect the new status.
 
 Use case ends.
 
 **Extensions**
 
-* 2a. The **JOB_NUMBER** is empty or is not a positive integer.
-    * 2a1. **System** shows an error message that the provided **JOB_NUMBER** is invalid and provides
+* 2a. The given input is invalid (e.g., empty, not positive integer).
+    * 2a1. **System** shows an error message that the provided input is invalid and provides
       the correct input format. <br>
       Use case ends.
-* 2b. The **JOB_NUMBER** does not correspond to any existing job in the job list
+* 2b. The given input does not correspond to any existing job in the job list
     * 2b1. **System** shows an error message indicating that the job does not exist. <br>
       Use case ends.
 * 2c. The job is already marked as completed.
@@ -630,22 +501,21 @@ Use case ends.
 
 **MSS**
 
-1. User requests to revert a maintenance job as not completed by using the command `unmark JOB_NUMBER`.
-2. **System** verifies that the **JOB_NUMBER** is a positive integer and corresponds to an existing, unmarked job.
-3. **System** sets the status of the maintenance job to "Pending" in the job list and "Not completed" in any linked
+1. User requests to revert a maintenance job as not completed.
+2. **System** verifies that the request is valid and corresponds to an existing marked job.
+3. **System** sets the status of the maintenance job accordingly in the job list in any linked
    tenant's job list.
-4. **System** shows the success message
-5. **System** automatically updates the maintenance job list display to reflect the new status.
+4. **System** shows the success message and refreshes the maintenance job list display to reflect the new status.
 
 Use case ends.
 
 **Extensions**
 
-* 2a. The **JOB_NUMBER** is empty or is not a positive integer.
-    * 2a1. **System** shows an error message that the provided **JOB_NUMBER** is invalid and provides
+* 2a. The given input is invalid (e.g., empty, not positive integer).
+    * 2a1. **System** shows an error message that the provided input is invalid and provides
       the correct input format. <br>
       Use case ends.
-* 2b. The **JOB_NUMBER** does not correspond to any existing job in the job list.
+* 2b. The given input does not correspond to any existing job in the job list.
     * 2b1. **System** shows an error message indicating that the job does not exist. <br>
       Use case ends.
 * 2c. The job is already marked as not completed.
@@ -658,15 +528,14 @@ Use case ends.
 
 **MSS**
 
-1. User requests a list of all available commands using the `help` command.
-2. **System** retrieves the list and formats it.
-3. **System** displays the list of "All available commands" including their formats.
+1. User requests a list of all available commands.
+2. **System** directs user to the user guide.
 
 Use case ends.
 
 **Extensions**
 
-* 1a. The command contains errors (e.g., wrong spelling).
+* 1a. The command format is wrong (e.g., wrong spelling).
     * 1a1. **System** shows an error message indicating that the command format is invalid. <br>
       Use case ends.
 
@@ -676,20 +545,19 @@ Use case ends.
 
 **MSS**
 
-1. User requests to find a tenant using the `find KEYWORD [MORE_KEYWORDS]` command.
-2. **System** verifies that at least one **KEYWORD** has been provided.
-3. **System** searches the tenant database for names containing any of the **KEYWORD**.
-4. **System** retrieves all matching tenant records.
-5. **System** automatically displays the list of matching tenants along with their details.
+1. User requests to find a specific tenant.
+2. **System** verifies the entered keyword(s).
+3. **System** retrieves all matching tenant records.
+4. **System** automatically displays the list of matching tenants along with their keywords.
 
 Use case ends.
 
 **Extensions**
 
-* 2a. The **KEYWORD** is empty.
-    * 2a1. **System** shows an error message indicating that at least one **KEYWORD** is required. <br>
+* 2a. The given keyword(s) is invalid (e.g., empty).
+    * 2a1. **System** shows an error message indicating that the provided keyword(s) is invalid. <br>
       Use case ends.
-* 3a. No tenants match the search **KEYWORD**.
+* 3a. No tenants match the search keyword.
     * 3a1. **System** shows a message indicating that no matching tenants were found. <br>
       Use case ends.
 
@@ -699,18 +567,17 @@ Use case ends.
 
 **MSS**
 
-1. User requests to find a maintenance job using the command `fjob KEYWORD [MORE KEYWORD]`.
-2. **System** verifies that at least one **KEYWORD** has been provided.
-3. **System** searches the maintenance job database for job descriptions containing any of the **KEYWORD**.
-4. **System** retrieves all matching job records.
-5. **System** automatically displays the list of matching jobs.
+1. User requests to find a maintenance job.
+2. **System** verifies the given keyword(s).
+3. **System** retrieves all matching job records.
+4. **System** automatically displays the list of matching jobs.
 
 **Extensions**
 
-* 2a. The **KEYWORD** is empty.
-    * 2a1. **System** shows an error message indicating that at least one **KEYWORD** is required. <br>
+* 2a. The given keyword(s) is invalid (e.g., empty).
+    * 2a1. **System** shows an error message indicating that the provided keyword(s) is invalid. <br>
       Use case ends.
-* 3a. No job descriptions match the search **KEYWORD**.
+* 3a. No job matches the search keyword(s).
     * 3a1. **System** shows a message indicating that no matching jobs were found. <br>
       Use case ends.
 
@@ -720,24 +587,23 @@ Use case ends.
 
 **MSS**
 
-1. User request to edit a tenant by using `edit TENANT_NUMBER` with one or more updated fields.
-2. **System** verifies that the provided **TENANT_NUMBER** is valid and corresponds to an existing tenant.
+1. User requests to edit a tenant with one or more updated fields.
+2. **System** verifies that the request is valid and corresponds to an existing tenant.
 3. **System** updates only the specified fields of the tenant's record while keeping other details unchanged.
-4. **System** shows the success message.
-5. **System** automatically updates the tenant list display to reflect the changes.
+4. **System** shows the success message and refreshes the tenant list display to reflect the changes.
 
 Use case ends.
 
 **Extensions**
 
-* 2a. The **TENANT_NUMBER** is empty or is not a positive integer
-    * 2a1. **System** shows an error message that the provided **TENANT_NUMBER** is invalid and provides
+* 2a. The given input is invalid (e.g., empty, not positive integer).
+    * 2a1. **System** shows an error message that the provided input is invalid and provides
       the correct input format. <br>
       Use case ends.
-* 2b. The provided **TENANT_NUMBER** does not correspond to any existing tenant in the list.
+* 2b. The given input does not correspond to any existing tenant in the list.
     * 2b1. **System** shows an error message indicating that the tenant does not exist. <br>
       Use case ends.
-* 2c. The command does not include any fields to edit
+* 2c. The command does not include any field to edit.
     * 2c1. **System** shows an error message indicating that at least one field must be specified. <br>
       Use case ends.
 
@@ -747,25 +613,24 @@ Use case ends.
 
 **MSS**
 
-1. User request to edit a maintenance job by using `edit JOB_NUMBER d/DESCRIPTION` with one or more updated fields.
-2. **System** verifies that the provided **JOB_NUMBER** is valid and corresponds to an existing job.
+1. User requests to edit a maintenance job with updated description.
+2. **System** verifies that the request is valid and corresponds to an existing job.
 3. **System** updates only the maintenance job description.
-4. **System** shows the success message.
-5. **System** updates the job list display to reflect the changes.
+4. **System** shows the success message and refreshes the job list display to reflect the changes.
 
 Use case ends.
 
 **Extensions**
 
-* 2a. The **JOB_NUMBER** is empty or is not a positive integer
-    * 2a1. **System** shows an error message that the provided **JOB_NUMBER** is invalid and provides
+* 2a. The given input is invalid (e.g., empty, not positive integer).
+    * 2a1. **System** shows an error message that the provided input is invalid and provides
       the correct input format. <br>
       Use case ends.
-* 2b. The provided **JOB_NUMBER** does not correspond to any existing job in the list.
+* 2b. The given input does not correspond to any existing job in the list.
     * 2b1. **System** shows an error message indicating that the job does not exist. <br>
       Use case ends.
-* 2c. The command does not include any **DESCRIPTION** to edit
-    * 2c1. **System** shows an error message indicating that **DESCRIPTION** cannot be empty. <br>
+* 2c. The command does not include any description to edit.
+    * 2c1. **System** shows an error message indicating that description cannot be empty. <br>
       Use case ends.
 
 ---
@@ -774,27 +639,24 @@ Use case ends.
 
 **MSS**
 
-1. User requests to link an existing maintenance job to a tenant by using the command `link TENANT_NUMBER j/JOB_NUMBER`.
-2. **System** verifies that the **TENANT_NUMBER** corresponds to an existing tenant and that the JOB_NUMBER corresponds
-   to an existing maintenance job.
+1. User requests to link an existing maintenance job to a tenant.
+2. **System** verifies that the request is valid, corresponds to an existing tenant and maintenance job.
 3. **System** links the specified job to the tenant updating the tenant's assigned job list and maintaining the job
    status.
-4. **System** shows a success message.
-5. **System** updates the UI to reflect the linked job under the tenant's assigned jobs.
+4. **System** shows a success message and refreshes the UI to reflect the linked job under the tenant's assigned jobs.
 
 Use case ends.
 
 **Extensions**
 
-* 2a. **TENANT_NUMBER** or **JOB_NUMBER** is empty or not a positive integer
-    * 2a1. **System** shows an error message that the provided **JOB_NUMBER** and/or **TENANT_NUMBER** is invalid and
-      provides
-      the correct input format. <br>
+* 2a. The given input is invalid (e.g., empty fields, not positive integer).
+    * 2a1. **System** shows an error message that the provided input is invalid and
+      provides the correct input format. <br>
       Use case ends.
-* 2b. **TENANT_NUMBER** does not correspond to any existing tenant.
+* 2b. The given tenant number does not correspond to any existing tenant.
     * 2b1. **System** shows an error message indicating that the tenant does not exist. <br>
       Use case ends.
-* 2c. **JOB_NUMBER** does not correspond to any existing job.
+* 2c. The given input does not correspond to any existing job.
     * 2c1. **System** shows an error message indicating that the job does not exist. <br>
       Use case ends.
 * 2d. The job is already linked to tenant.
@@ -950,7 +812,7 @@ testers are expected to do more *exploratory* testing.
     1. Prerequisites: List all tenants using the `list` command. At least one tenant in the list. List all jobs using
        the `ljob` command. At least one job (job id: 1) in the list.
 
-    2. Test case: `link 1 j/ 1`
+    2. Test case: `link 1 j/1`
        **Expected:** Job is linked to the tenant. Status message shows the job number and name of tenant linked. Job is
        displayed in the tenant's maintenance information section.
 
@@ -958,14 +820,14 @@ testers are expected to do more *exploratory* testing.
     1. Prerequisites: List all tenants using the `list` command. At most 4 tenants in the list. List all jobs using the
        `ljob` command. At least one job (job id: 1) in the list.
 
-    2. Test case: `link 5 j/ 1`
+    2. Test case: `link 5 j/1`
        **Expected:** Job is not linked to the tenant. Error details shown in status message indicating invalid tenant
        index.
 3. Linking a tenant and a nonexisting job to each other.
     1. Prerequisites: List all tenants using the `list` command. at least 1 tenant in the list. List all jobs using the
        `ljob` command. At most 3 (max job id: 3) in the list.
 
-    2. Test case: `link 1 j/ 4`
+    2. Test case: `link 1 j/4`
        **Expected:** Job is not linked to the tenant. Error details showing in status message indicating invalid job
        index.
 
@@ -988,6 +850,8 @@ Team Size: 5 <br>
    - Currently, an address field of `a/ a/` is not accepted, while one of `a/a/` is accepted. 
 9. Perform more rigorous validation of special character positions in phone numbers in the `tenant` command
     - e.g. Phone numbers like `999(())9999` or `99-----9` should be rejected.
+10. Add an extra layer of user verification to the `clear` command.
+    - e.g. Require user to input 'Y' in response to a verification question before clearing the data.
 
 ## **Appendix: Effort**
 

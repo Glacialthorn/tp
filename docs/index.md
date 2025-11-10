@@ -8,7 +8,7 @@
 [![CI Status](https://github.com/AY2526S1-CS2103T-F08a-2/tp/actions/workflows/gradle.yml/badge.svg)](https://github.com/AY2526S1-CS2103T-F08a-2/tp/actions/workflows/gradle.yml)
 [![codecov](https://codecov.io/github/AY2526S1-CS2103T-F08a-2/tp/graph/badge.svg?token=ZM6CM8A0LL)](https://codecov.io/github/AY2526S1-CS2103T-F08a-2/tp)
 
-![Ui](images/Updated_GUI_v3.png)
+![Ui](images/Ui.png)
 
 **EstateMate is a desktop application for managing your contact details.** While it has a GUI, most of the user interactions happen using a CLI (Command Line Interface).
 
